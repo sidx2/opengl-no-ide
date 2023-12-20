@@ -1,1 +1,1 @@
-g++ -Idependencies/GLFW/include -Ldependencies/GLFW/lib-mingw-w64 -o main.exe main.cpp -lopengl32 -lUser32 -lGdi32 -lShell32 -lglfw3 -lgdi32
+g++ -Idependencies/GLFW/include -Idependencies/GLEW/include -Ldependencies/GLFW/lib-mingw-w64 -Ldependencies/GLEW/lib -o main.exe main.cpp -lkernel32 -lUser32 -lGdi32 -lShell32 -lglfw3 -lgdi32 -lglew32s -lopengl32
