@@ -108,20 +108,30 @@ int main(void)
         std::cout << "Glew init failed!\n";
     };
 
-    float positions[6] = {
-        0, 0.5,
-        -0.5, -0.5,
-        0.5, -0.5
+    float positions[] = {
+        -0.5, -0.5, // 0
+         0.5, -0.5, // 1
+         0.5,  0.5, // 2
+        -0.5,  0.5  // 3
     };
 
-    unsigned int a;
+    uint indexBuf[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    uint a;
     glGenBuffers(1, &a);
     glBindBuffer(GL_ARRAY_BUFFER, a);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
     
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
+    uint ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint), indexBuf, GL_STATIC_DRAW);
     // shaders
     shaderProgramSource src = parseShader("./res/shaders/basic.shader");
 
@@ -134,7 +144,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
