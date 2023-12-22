@@ -157,14 +157,25 @@ int main(void)
     uint shader = createShader(src.VertexSource, src.FragmentSource);
     glUseProgram(shader);
 
+    int location = glGetUniformLocation(shader, "u_Color");
+    ASSERT(location != -1);
+    float r = 0.0f;
+    glUniform4f(location, r, 0.3, 0.8, 1.0);
+    
+    float inc = 0.0005;
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glUniform4f(location, r, 0.3, 0.8, 1.0);
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
+        if (r > 1.0f) inc = -0.0005;
+        else if (r < 0.0f) inc = 0.0005f;
+
+        r += inc;
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
