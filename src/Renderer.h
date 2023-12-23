@@ -1,5 +1,6 @@
 #pragma once
-
+#define GLEW_STATIC
+#include <gl/glew.h>
 
 #define ASSERT(x) if (!(x)) raise(SIGBREAK);
 #define GLCall(x) \

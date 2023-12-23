@@ -9,6 +9,8 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexBufferLayout.h"
+#include "VertexArray.h"
 
 #define uint unsigned int
 
@@ -139,7 +141,12 @@ int main(void)
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
+    VertexArray va;
     VertexBuffer vb(positions, 7 * 2 * sizeof(float));
+    VertexBufferLayout layout;
+    layout.Push<float>(2);
+    va.AddBuffer(vb, layout);
+    va.Bind();
     
     GLCall(glEnableVertexAttribArray(0));
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
@@ -173,7 +180,7 @@ int main(void)
         GLCall(glUseProgram(shader));
         GLCall(glUniform4f(location, r, 0.3, 0.8, 1.0));
 
-        glBindVertexArray(vao);
+        va.Bind();
 
         // GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
         // ib.bind(); // can optionally be used to bind instead
