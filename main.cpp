@@ -127,22 +127,28 @@ int main(void)
         std::cout << "Glew init failed!\n";
     };
 
+    cout << "version: " << string((const char *) glGetString(GL_VERSION)) << endl;
+
     float positions[] = {
-        -0.5, -0.5, // 0
-         0.5, -0.5, // 1
-         0.5,  0.5, // 2
-        -0.5,  0.5  // 3
+        -0.5,  -0.5,  // 0
+         0.5,  -0.5,  // 1
+         0.5,   0.5,  // 2
+        -0.5,   0.5,  // 3
+         0.75, -0.5,  // 4
+         0.5,  -1.0f, // 5
+         1.0f, -1.0f  // 6
     };
 
     uint indexBuf[] = {
         0, 1, 2,
-        2, 3, 0
+        2, 3, 0,
+        4, 5, 6
     };
 
-    uint a;
-    GLCall(glGenBuffers(1, &a));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, a));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    uint buffer;
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 7 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
     
     GLCall(glEnableVertexAttribArray(0));
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
@@ -150,7 +156,8 @@ int main(void)
     uint ibo;
     GLCall(glGenBuffers(1, &ibo));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(uint), indexBuf, GL_STATIC_DRAW));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 9 * sizeof(uint), indexBuf, GL_STATIC_DRAW));
+
     // shaders
     shaderProgramSource src = parseShader("./res/shaders/basic.shader");
 
@@ -170,7 +177,8 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUniform4f(location, r, 0.3, 0.8, 1.0);
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        GLCall(glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, nullptr));
 
         if (r > 1.0f) inc = -0.0005;
         else if (r < 0.0f) inc = 0.0005f;
