@@ -91,21 +91,22 @@ int main(void)
     va.Unbind();
     ib.Unbind();
 
+    Renderer renderer;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        renderer.Clear();
 
         shader.Bind();
         shader.SetUniform4f("u_Color", r, 0.3, 0.8, 1.0);
 
-        va.Bind();
-
         // GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
         // ib.bind(); // can optionally be used to bind instead
 
-        GLCall(glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, nullptr));
+        renderer.Draw(va, ib, shader);
+        // GLCall(glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, nullptr));
 
         if (r > 1.0f) inc = -0.0005;
         else if (r < 0.0f) inc = 0.0005f;
