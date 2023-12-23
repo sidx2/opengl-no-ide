@@ -6,27 +6,13 @@
 #include <fstream>
 #include <sstream>
 #include <signal.h>
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 #define uint unsigned int
-#define ASSERT(x) if (!(x)) raise(SIGBREAK);
-#define GLCall(x) \
-    GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
 using namespace std;
-
-static void GLClearError() { 
-    while(glGetError()); 
-}
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-    while (GLenum err = glGetError()) {
-        printf("ERROR:%s:%i :: %s :: (%i)\n", file, line, function, err);
-        return false;
-    }
-    return true;
-}
 
 struct shaderProgramSource {
     string VertexSource;
@@ -153,18 +139,12 @@ int main(void)
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    uint buffer;
-    GLCall(glGenBuffers(1, &buffer));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 7 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+    VertexBuffer vb(positions, 7 * 2 * sizeof(float));
     
     GLCall(glEnableVertexAttribArray(0));
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
-    uint ibo;
-    GLCall(glGenBuffers(1, &ibo));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 9 * sizeof(uint), indexBuf, GL_STATIC_DRAW));
+    IndexBuffer ib(indexBuf, 9);
 
     // shaders
     shaderProgramSource src = parseShader("./res/shaders/basic.shader");
@@ -195,7 +175,8 @@ int main(void)
 
         glBindVertexArray(vao);
 
-        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+        // GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+        // ib.bind(); // can optionally be used to bind instead
 
         GLCall(glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, nullptr));
 
