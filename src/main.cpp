@@ -26,20 +26,22 @@
 
 using namespace std;
 
+#define WINDOW_WIDTH (1280.f * 0.75f)
+#define WINDOW_HEIGHT (720.f * 0.75f)
+
 int main(void)
 {
     GLFWwindow* window;
 
     /* Initialize the library */
-    if (!glfwInit())
-        return -1;
+    if (!glfwInit()) return -1;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3),
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -55,27 +57,19 @@ int main(void)
     cout << "version: " << string((const char *) glGetString(GL_VERSION)) << endl;
 
     float positions[] = {
-        -0.5,  -0.5,  0.0f, 0.0f,  // 0
-         0.5,  -0.5,  1.0f, 0.0f,  // 1
-         0.5,   0.5,  1.0f, 1.0f,  // 2
-        -0.5,   0.5,  0.0f, 1.0f   // 3
-        //  0.75, -0.5,  // 4
-        //  0.5,  -1.0f, // 5
-        //  1.0f, -1.0f  // 6
+        -50.f,  -50.f,  0.0f, 0.0f,  // 0
+         50.f,  -50.f,  1.0f, 0.0f,  // 1
+         50.f,   50.f,  1.0f, 1.0f,  // 2
+        -50.f,   50.f,  0.0f, 1.0f   // 3
     };
 
     uint indexBuf[] = {
         0, 1, 2,
-        2, 3, 0,
-        // 4, 5, 6
+        2, 3, 0
     };
 
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-    // uint vao;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
 
     VertexArray va;
     VertexBuffer vb(positions, 4 * 4 * sizeof(float));
@@ -84,15 +78,12 @@ int main(void)
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
     va.Bind();
-    
-    // GLCall(glEnableVertexAttribArray(0));
-    // GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
     IndexBuffer ib(indexBuf, 9);
 
     // ortho/presp proj mat
-    glm::mat4 proj = glm::ortho(-2.f, 2.f, -1.5f, 1.5f, -1.f, 1.f);
-    glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(-1.5, 0, 0));
+    glm::mat4 proj = glm::ortho(0.f, WINDOW_WIDTH, 0.f, WINDOW_HEIGHT, -1.f, 1.f);
+    glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 0));
     
     // shader
     Shader shader("./res/shaders/basic.shader");
@@ -114,39 +105,43 @@ int main(void)
 
     Renderer renderer;
 
-    ImGui::CreateContext();    ImGui_ImplGlfwGL3_Init(window, true);
+    ImGui::CreateContext();    
+    ImGui_ImplGlfwGL3_Init(window, true);
     ImGui::StyleColorsDark();
 
-    glm::vec3 translation(0.9, 0.9, 0);
+    glm::vec3 translationA(100, 200, 0);
+    glm::vec3 translationB(300, 200, 0);
 
-    /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
         renderer.Clear();
         ImGui_ImplGlfwGL3_NewFrame();
 
-        glm::mat4 model = glm::translate(glm::mat4(1.f), translation);
-        glm::mat4 mvp = proj * view * model;
 
-        
         shader.Bind();
-        shader.SetUniform4f("u_Color", r, 0.3, 0.8, 1.0);
-        shader.SetUniformMat4f("u_MVP", mvp);
 
-        // GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-        // ib.bind(); // can optionally be used to bind instead
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.f), translationA);
+            glm::mat4 mvp = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp);
+            renderer.Draw(va, ib, shader);
+        }
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.f), translationB);
+            glm::mat4 mvp = proj * view * model;
+            shader.SetUniformMat4f("u_MVP", mvp);
+            renderer.Draw(va, ib, shader);
+        }
 
-        renderer.Draw(va, ib, shader);
-        // GLCall(glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, nullptr));
 
         if (r > 1.0f) inc = -0.0005;
         else if (r < 0.0f) inc = 0.0005f;
 
         r += inc;
 
-        {                      // Display some text (you can use a format string too)
-            ImGui::SliderFloat3("float", &translation.x, 0.0f, 1.0f); 
+        {   // Display some text (you can use a format string too)
+            ImGui::SliderFloat3("Translation A", &translationA.x, 0, 100); 
+            ImGui::SliderFloat3("Translation B", &translationB.x, 0, 100); 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         }
 
