@@ -88,15 +88,19 @@ int main(void)
     IndexBuffer ib(indexBuf, 9);
 
     // ortho/presp proj mat
-    glm::mat4 proj = glm::ortho(-4.f, 4.f, -3.f, 3.f, -1.f, 1.f);
+    glm::mat4 proj = glm::ortho(-2.f, 2.f, -1.5f, 1.5f, -1.f, 1.f);
+    glm::mat4 view = glm::translate(glm::mat4(1.f), glm::vec3(-1.5, 0, 0));
+    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.9, 0.9, 0));
 
+    glm::mat4 mvp = proj * view * model;
+    
     // shader
     Shader shader("./res/shaders/basic.shader");
     shader.Bind();
 
     float r = 0.0f;
     shader.SetUniform4f("u_Color", r, 0.3, 0.8, 1.0);
-    shader.SetUniformMat4f("u_MVP", proj);
+    shader.SetUniformMat4f("u_MVP", mvp);
 
     float inc = 0.0005;
 
