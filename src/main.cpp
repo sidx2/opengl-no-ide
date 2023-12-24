@@ -1,17 +1,23 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <signal.h>
+
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #define uint unsigned int
 
@@ -46,28 +52,32 @@ int main(void)
     cout << "version: " << string((const char *) glGetString(GL_VERSION)) << endl;
 
     float positions[] = {
-        -0.5,  -0.5,  // 0
-         0.5,  -0.5,  // 1
-         0.5,   0.5,  // 2
-        -0.5,   0.5,  // 3
-         0.75, -0.5,  // 4
-         0.5,  -1.0f, // 5
-         1.0f, -1.0f  // 6
+        -0.5,  -0.5,  0.0f, 0.0f,  // 0
+         0.5,  -0.5,  1.0f, 0.0f,  // 1
+         0.5,   0.5,  1.0f, 1.0f,  // 2
+        -0.5,   0.5,  0.0f, 1.0f   // 3
+        //  0.75, -0.5,  // 4
+        //  0.5,  -1.0f, // 5
+        //  1.0f, -1.0f  // 6
     };
 
     uint indexBuf[] = {
         0, 1, 2,
         2, 3, 0,
-        4, 5, 6
+        // 4, 5, 6
     };
+
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     // uint vao;
     // glGenVertexArrays(1, &vao);
     // glBindVertexArray(vao);
 
     VertexArray va;
-    VertexBuffer vb(positions, 7 * 2 * sizeof(float));
+    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
     VertexBufferLayout layout;
+    layout.Push<float>(2);
     layout.Push<float>(2);
     va.AddBuffer(vb, layout);
     va.Bind();
@@ -77,14 +87,22 @@ int main(void)
 
     IndexBuffer ib(indexBuf, 9);
 
+    // ortho/presp proj mat
+    glm::mat4 proj = glm::ortho(-4.f, 4.f, -3.f, 3.f, -1.f, 1.f);
+
     // shader
     Shader shader("./res/shaders/basic.shader");
     shader.Bind();
 
     float r = 0.0f;
     shader.SetUniform4f("u_Color", r, 0.3, 0.8, 1.0);
+    shader.SetUniformMat4f("u_MVP", proj);
 
     float inc = 0.0005;
+
+    Texture texture("./res/textures/s-logo.png");
+    texture.Bind(0);
+    shader.SetUniform1i("u_Texture", 0);
 
     va.Unbind();
     shader.Unbind();

@@ -1,6 +1,7 @@
 #pragma once
 #define GLEW_STATIC
 #include <gl/glew.h>
+#include <signal.h>
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 
